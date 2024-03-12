@@ -15,6 +15,7 @@ from django.contrib import messages
 
 class BookAppointment(View):
     def get(self, request):
+        print("++++++++++++++",datetime.now())
         doctors = Doctor.objects.all()
         context = {
             "doctors": doctors
@@ -29,6 +30,7 @@ class BookAppointment(View):
         message = request.POST.get("message")
         date = request.POST.get("date")
         time = request.POST.get("time")
+        print("+++++++++++",time)
 
         validation_result = self.validate_appointment(doctor_id,date, time,)
         if validation_result:
@@ -40,7 +42,7 @@ class BookAppointment(View):
             appointment = Appointment.objects.create(doctor=doctor, name=name, email=email, phone=phone,
                                                       message=message, date=date, time=time)
             appointment_mail(appointment, doctor)
-            messages.success(request, f"Your appointment is booked at {appointment.date} {appointment.time}")
+            messages.success(request, f"Your appointment is booked at Date : {appointment.date}  Time :{appointment.time}")
         
         return redirect('home')  # Redirect to the home page after processing the form
     
@@ -48,77 +50,35 @@ class BookAppointment(View):
     def validate_appointment(doctor_id,date, time_str):
         if Appointment.objects.filter(doctor= doctor_id, time=time_str,date=date).exists():
             return "Already Booke please select another one slot of time "
-
+        
+        if not doctor_id:
+            return "Select  Your Doctor "
+        
+    
+        exp = datetime.strptime(date, "%Y-%m-%d").date()  # Convert exp string to datetime.date
+        today_date = datetime.now().date()
+        if exp < today_date:  # Check if exp is in the past
+            return "Please select a Vaild date . "
+        
+         
         selected_datetime = datetime.strptime(date + ' ' + time_str, '%Y-%m-%d %H:%M')
         current_datetime = datetime.now()
+        if selected_datetime < current_datetime:
+            return "Choose Valid time ."
 
-        if not doctor_id:
-            return "Select  Your Doctor"
-
-        if selected_datetime <= current_datetime:
-            return "Please select a future time"
-
-        if selected_datetime.date() <= current_datetime.date():
-            return "Please select today's date"
+    
+        
 
         return None  # Return None if no validation errors occur
 
-# Create your views here.
 
-
-
-# class BookAppointment(View):
-#     def get(self,request):
-#         doctors = Doctor.objects.all()
-#         current_date = datetime.today().date()
-#         current_time = datetime.now().time()
-#         print("Current Date:", current_date,"++++++++++++++++++++++++",current_time)
-
-
-#         context = {
-#             "doctors":doctors
-#         }
-#         return render(request , "home.html" , context)
-    
-#     def post(self,request):
-#         name = request.POST.get("name")
-#         phone = request.POST.get("phone")
-#         email = request.POST.get("email")
-#         doctor = request.POST.get("doctor")
-#         print("+++++++++++",doctor)
-#         message = request.POST.get("message")
-#         date = request.POST.get("date")
-#         time = request.POST.get("time")
-
-
-#         jj =BookAppointment.validate_appointment(date,time) 
-#         if jj:
-#             print("++++++",jj)
-#             messages.error(request, f" {jj}Please select the correct time and date")
-         
-        
-        
-        
-#         if date:
-#             obj = Appointment.objects.create(doctor_id= doctor , name= name , email= email , phone=phone, message= message,date=date,
-#                                             time = time)
-#             doctor_mail = Doctor.objects.get(id=obj.doctor.id)
-#             appointment_mail(obj,doctor_mail)
-#             messages.add_message(request,messages.SUCCESS,f"Your Appointment  is booked at{obj.date} {obj.time}  ")
-#             #return render(request, 'show.html'
-       
-#         return render(request, "home.html")
-    
-#     @staticmethod
-#     def validate_appointment(date,time):
-#         if datetime.now().strftime('%H:%M') != time:
-#             return   "Please select the correct time and date"
-          
-#         if datetime.now().date() != datetime.strptime(date, '%Y-%m-%d').date():
-#             return  "Please select today's date"
-          
-
-       
+class MyAppointments(View):
+    def get(self,request):
+        appointments = Appointment.objects.all()
+        context = {
+            "appointments": appointments
+        }
+        return render(request,"appointments.html",context )
 
         
 

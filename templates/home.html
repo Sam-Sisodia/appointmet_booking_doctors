@@ -65,16 +65,12 @@
         <div class="formbold-mb-5">
             <label for="doctor" class="formbold-form-label">Select Doctor </label>
             <select name="doctor" id="doctor" class="formbold-form-input" required>
-                <option value="" selected disabled>Select Doctor </option>
+                <option value="" selected disabled>Select  Doctor </option>
                 
-                    {% for doc in doctors %}
-                    {% if doc.on_leave %}
-                        <option value="{{doc.id}}"  style="color: red; opacity: 0.7;" disabled> {{doc.name }}  Not availble   </option>
-                        {% else % }
-                            <option value="{{doc.id}}"> {{doc.name }}    </option>
-
-                    {% endif %}
-                    {% endfor  %}
+                {% for doc in doctors %}
+                      <option value="{{doc.id}}" > {{doc.name }}    </option>
+                  
+                {% endfor %}
                
                 <!-- Add more options as needed -->
             </select>
